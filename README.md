@@ -1,6 +1,6 @@
 Process-Locker
 ==============
-Base on redis, same resource should only be processed once. Requests about the resource will be pending until process is complete and then the result will be returned 
+Base on redis, same resource should only be processed once. Requests about the resource will be pending until process is complete and then the result will be returned.
 基于redis，同一个资源仅会被处理一次，如果一个资源正在处理，当前请求都会被挂起，待处理完成后返回结果。
 
 ## Usage:
