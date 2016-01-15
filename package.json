@@ -1,0 +1,28 @@
+{
+  "name": "process-locker",
+  "version": "0.1.0",
+  "description": "Base on redis, same resource should only be processed once. Requests about the resource will be pending until process is complete and then the result will be returned.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -r thunk-mocha test/index.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/orangemi/process-locker"
+  },
+  "bugs": {
+    "url": "https://github.com/orangemi/process-locker/issues"
+  },
+  "homepage": "https://github.com/orangemi/process-locker",
+  "author": "Orange Mi <orangemiwj@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^2.2.0",
+    "fs": "0.0.2",
+    "thunk-redis": "^1.4.0",
+    "thunks": "^4.1.1"
+  },
+  "devDependencies": {
+    "thunk-mocha": "^1.0.1"
+  }
+}
