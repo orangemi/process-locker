@@ -19,13 +19,14 @@ function Locker (options) {
   options = options || {}
 
   let list = Object.create(null)
-  let logger, redis, redisSub, redisPrefix, channel, resultTimeout, lockTimeout
+  let logger, redis, redisSub, redisPrefix, channel, resultTimeout, lockTimeout, processTimeout
 
   let redisConfig = options.redisConfig || ['localhost:6379']
   redisPrefix = options.redisPrefix || 'locker'
   channel = redisPrefix + ':' + (options.channel || 'channel')
   resultTimeout = options.resultTimeout || 30 * 60 * 1000
   lockTimeout = options.lockTimeout || 60 * 60 * 1000
+  processTimeout = options.processTimeout || 10 * 60 * 1000
   logger = options.logger || noop
 
   redis = thunkRedis.createClient(redisConfig.hosts, redisConfig.options)
@@ -78,22 +79,43 @@ function Locker (options) {
     delete list[key]
   }).subscribe(channel)()
 
-  locker.request = function (key, options) {
-    options = options || {}
+  locker.request = function (key, _options) {
+    _options = _options || {}
     return function (callback) {
       thunk(function *() {
         let callbackList = list[key] = list[key] || []
+        let timer
+        let _callback = callback
+        callback = function () {
+          if (timer) {
+            clearTimeout(timer)
+            timer = null
+          }
+          _callback.apply(null, arguments)
+        }
+
         callbackList.push(callback)
 
         let result
         let redisKey = `${redisPrefix}:${key}`
-        if (options.get !== true) {
+        if (_options.get !== true) {
           result = yield redis.evalauto(luaAddSubScript, 1, redisKey, lockTimeout)
         } else {
           result = yield redis.get(redisKey)
         }
         debug('redis %s response %s', redisKey, result)
-        if (result === Locker.WAIT) return
+
+        timer = setTimeout(function () {
+          let index = callbackList.indexOf(callback)
+          if (index === -1) return
+          callbackList.splice(index, 1)
+          if (!callbackList.length) delete list[key]
+          callback(new Error('process Timeout'))
+        }, processTimeout)
+
+        if (result === Locker.WAIT) {
+          return
+        }
 
         let index = callbackList.indexOf(callback)
         if (index === -1) return

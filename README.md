@@ -9,16 +9,18 @@ Locker = require('process-locker')
 thunk = require('thunks')()
 var locker = Locker()
 var key = 'resource-key'
-locker(key)(function (err, resp) {
+locker.request(key)(function (err, resp) {
+  var result
 	if (resp.status === Locker.status.LOCKED) {
     // do the process
-    // ...
+    // result = ...
     // call publish when job done
-    var result = {}
     thunk(locker.publish(key, result))()
   } else if (resp.status === Locker.status.DONE) {
-  	// job with result
+  	// job with resp.result
+    result = resp.result
   }
+  ...
 })
 ```
 
@@ -31,6 +33,7 @@ options:
 - **channel** *String* channel name for redis subscribe Default: `channel`
 - **resultTimeout** *Number* milliseconds to cache the process result Default: `30 * 60 * 1000`
 - **lockTimeout** *Number* milliseconds to lock the process result Default: `60 * 60 * 1000`
+- **processTimeout** *Number* milliseconds to wait the process result Default: `10 * 60 * 1000`
 - **logger** *Function* log the error when occurs(mostly for redis) Default: null
 
 ### Locker.LOCKED
@@ -51,4 +54,4 @@ return a generator function or used by `callback(err)`
 - **object** *Json* the result used to notcie all process/request
 
 ## TODO:
-[ ] add timeout for request waiting the real processer
+[X] add timeout error for request waiting the real processer

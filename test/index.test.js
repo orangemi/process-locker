@@ -5,18 +5,19 @@ const Locker = require('../')
 const assert = require('assert')
 
 let locker = Locker({
-  redisConfig: {
-    hosts: ['127.0.0.1:6379']
-  }
+  processTimeout: 100
 })
 
 describe('main', function () {
   let key = 'one-key'
+  let key2 = 'one-key2'
   before(function *() {
     yield locker.redis.del('locker:' + key)
+    yield locker.redis.del('locker:' + key2)
   })
   after(function *() {
     yield locker.redis.del('locker:' + key)
+    yield locker.redis.del('locker:' + key2)
   })
   it('start to lock', function *() {
     let result = yield locker.request(key)
@@ -41,5 +42,16 @@ describe('main', function () {
       assert.strictEqual(isReturned, true)
       callback()
     })()
+  })
+
+  it('wait to timeout', function *() {
+    yield locker.request(key2)
+    try {
+      yield locker.request(key2)
+      console.error('should never run it!')
+    } catch (e) {
+      assert.strictEqual(e.message, 'process Timeout')
+      yield locker.publish(key2, {})
+    }
   })
 })
