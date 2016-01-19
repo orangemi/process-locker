@@ -1,6 +1,6 @@
 {
   "name": "process-locker",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Base on redis, same resource should only be processed once. Requests about the resource will be pending until process is complete and then the result will be returned.",
   "main": "index.js",
   "scripts": {
@@ -18,10 +18,10 @@
   "license": "MIT",
   "dependencies": {
     "debug": "^2.2.0",
-    "thunk-redis": "^1.4.0",
-    "thunks": "^4.1.1"
+    "thunk-redis": "^1.4.0"
   },
   "devDependencies": {
+    "thunks": "^4.1.1",
     "thunk-mocha": "^1.0.1"
   }
 }
