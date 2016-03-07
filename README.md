@@ -28,13 +28,13 @@ locker.request(key)(function (err, resp) {
 ### Locker(options)
 return a locker instance
 options:
-- **redisConfig** *Object* use [thunk-redis](https://github.com/thunks/thunk-redis) config. Default: `['localhost:6379']`
+- **redis** *thunk-redis-client* use [thunk-redis](https://github.com/thunks/thunk-redis) client to lock and publish events. Default use: `localhost:6379`
+- **subRedis** *thunk-redis-client* use [thunk-redis](https://github.com/thunks/thunk-redis) client to subscribe events. Default use: `localhost:6379`
 - **redisPrefix** *String* Default: `locker`
 - **channel** *String* channel name for redis subscribe Default: `channel`
 - **resultTimeout** *Number* milliseconds to cache the process result Default: `30 * 60 * 1000`
 - **lockTimeout** *Number* milliseconds to lock the process result Default: `60 * 60 * 1000`
 - **processTimeout** *Number* milliseconds to wait the process result Default: `10 * 60 * 1000`
-- **logger** *Function* log the error when occurs(mostly for redis) Default: null
 
 ### Locker.LOCKED
 locker locked the key name and you have the only permission to process the resource. So you are the real processor.

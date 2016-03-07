@@ -1,10 +1,11 @@
 'use strict'
 
 const fs = require('fs')
+const path = require('path')
 const debug = require('debug')('process-locker')
 const thunkRedis = require('thunk-redis')
-const luaAddSubScript = fs.readFileSync(__dirname + '/lua/add_sub.lua', {encoding: 'utf8'})
-const luaDelPubScript = fs.readFileSync(__dirname + '/lua/del_pub.lua', {encoding: 'utf8'})
+const luaAddSubScript = fs.readFileSync(path.join(__dirname, '/lua/add_sub.lua'), {encoding: 'utf8'})
+const luaDelPubScript = fs.readFileSync(path.join(__dirname, '/lua/del_pub.lua'), {encoding: 'utf8'})
 
 const STATUS = ['LOCKED', 'WAIT', 'DONE']
 
@@ -18,38 +19,18 @@ function Locker (options) {
   options = options || {}
 
   var list = Object.create(null)
-  var logger, redis, redisSub, redisPrefix, channel, resultTimeout, lockTimeout, processTimeout
+  var redis, redisSub, redisPrefix, channel, resultTimeout, lockTimeout, processTimeout
 
-  var redisConfig = options.redisConfig || ['localhost:6379']
+  redis = options.redis || (typeof options.redis === 'string' ? thunkRedis.createClient(options.redis) : thunkRedis.createClient('localhost:6379'))
+  redisSub = options.redisSub || (typeof options.redisSub === 'string' ? thunkRedis.createClient(options.redisSub) : thunkRedis.createClient('localhost:6379'))
   redisPrefix = options.redisPrefix || 'locker'
   channel = redisPrefix + ':' + (options.channel || 'channel')
   resultTimeout = options.resultTimeout || 30 * 60 * 1000
   lockTimeout = options.lockTimeout || 60 * 60 * 1000
   processTimeout = options.processTimeout || 10 * 60 * 1000
-  logger = options.logger || noop
 
-  redis = thunkRedis.createClient(redisConfig.hosts, redisConfig.options)
-  redisSub = thunkRedis.createClient(redisConfig.hosts, redisConfig.options)
-
-  initListener(redis)
-  initListener(redisSub)
   var locker = {}
   locker.redis = redis
-
-  function initListener (client) {
-    return client
-      .on('error', function (err) {
-        err.class = 'thunk-redis'
-        logger(err)
-        if (err.code === 'ENETUNREACH') throw err
-      })
-      .on('close', function (err) {
-        err = err || new Error('Redis client closed!')
-        err.class = 'thunk-redis'
-        logger(err)
-        throw err
-      })
-  }
 
   redisSub.on('message', function (chl, json) {
     if (chl !== channel) return
