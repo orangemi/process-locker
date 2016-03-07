@@ -5,8 +5,7 @@ Base on redis, same resource should only be processed once. Requests about the r
 
 ## Usage:
 ```
-Locker = require('process-locker')
-thunk = require('thunks')()
+var Locker = require('process-locker')
 var locker = Locker()
 var key = 'resource-key'
 locker.request(key)(function (err, resp) {
@@ -15,7 +14,7 @@ locker.request(key)(function (err, resp) {
     // do the process
     // result = ...
     // call publish when job done
-    thunk(locker.publish(key, result))()
+    locker.publish(key, result)()
   } else if (resp.status === Locker.status.DONE) {
   	// job with resp.result
     result = resp.result

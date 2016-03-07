@@ -19,10 +19,10 @@ function Locker (options) {
   options = options || {}
 
   var list = Object.create(null)
-  var redis, redisSub, redisPrefix, channel, resultTimeout, lockTimeout, processTimeout
+  var redis, subRedis, redisPrefix, channel, resultTimeout, lockTimeout, processTimeout
 
   redis = options.redis || (typeof options.redis === 'string' ? thunkRedis.createClient(options.redis) : thunkRedis.createClient('localhost:6379'))
-  redisSub = options.redisSub || (typeof options.redisSub === 'string' ? thunkRedis.createClient(options.redisSub) : thunkRedis.createClient('localhost:6379'))
+  subRedis = options.subRedis || (typeof options.subRedis === 'string' ? thunkRedis.createClient(options.subRedis) : thunkRedis.createClient('localhost:6379'))
   redisPrefix = options.redisPrefix || 'locker'
   channel = redisPrefix + ':' + (options.channel || 'channel')
   resultTimeout = options.resultTimeout || 30 * 60 * 1000
@@ -31,8 +31,9 @@ function Locker (options) {
 
   var locker = {}
   locker.redis = redis
+  locker.subRedis = subRedis
 
-  redisSub.on('message', function (chl, json) {
+  subRedis.on('message', function (chl, json) {
     if (chl !== channel) return
     var key, value
 
