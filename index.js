@@ -115,6 +115,7 @@ function Locker (options) {
   }
 
   function deleteCallback (key, callback) {
+    if (!list[key]) return
     var index = list[key].indexOf(callback)
     if (index === -1) return
     list[key].splice(index, 1)
