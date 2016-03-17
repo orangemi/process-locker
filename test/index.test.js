@@ -31,8 +31,7 @@ describe('main', function () {
       redisPrefix: 'locker2',
       channel: 'newChannel',
       resultTimeout: 1000,
-      lockTimeout: 200,
-      processTimeout: 200
+      lockTimeout: 200
     })
     locker = Locker({
       redis: 'localhost:6379',
@@ -40,8 +39,7 @@ describe('main', function () {
       redisPrefix: 'locker2',
       channel: 'newChannel',
       resultTimeout: 1000,
-      lockTimeout: 200,
-      processTimeout: 200
+      lockTimeout: 200
     })
   })
 
@@ -70,13 +68,13 @@ describe('main', function () {
     })()
   })
 
-  it('wait to timeout', function *() {
+  it('locker timeout', function *() {
     yield locker.request(key2)
     try {
       yield locker.request(key2)
-      console.error('should never run it!')
+      assert(false, 'should never run it!')
     } catch (e) {
-      assert.strictEqual(e.message, 'process Timeout')
+      assert.strictEqual(e.message, 'lock timeout')
       yield locker.publish(key2, {})
     }
   })

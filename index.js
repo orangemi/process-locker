@@ -19,7 +19,7 @@ function Locker (options) {
   options = options || {}
 
   var list = Object.create(null)
-  var redis, subRedis, redisPrefix, channel, resultTimeout, lockTimeout, processTimeout
+  var redis, subRedis, redisPrefix, channel, resultTimeout, lockTimeout
 
   redis = typeof options.redis === 'string' ? thunkRedis.createClient(options.redis) : options.redis || thunkRedis.createClient('localhost:6379')
   subRedis = typeof options.subRedis === 'string' ? thunkRedis.createClient(options.subRedis) : options.subRedis || thunkRedis.createClient('localhost:6379')
@@ -27,7 +27,6 @@ function Locker (options) {
   channel = redisPrefix + ':' + (options.channel || 'channel')
   resultTimeout = options.resultTimeout || 30 * 60 * 1000
   lockTimeout = options.lockTimeout || 60 * 60 * 1000
-  processTimeout = options.processTimeout || 10 * 60 * 1000
 
   var locker = {}
   locker.redis = redis
@@ -85,8 +84,8 @@ function Locker (options) {
 
         timer = setTimeout(function () {
           deleteCallback(key, callback)
-          callback(new Error('process Timeout'))
-        }, processTimeout)
+          callback(new Error('lock timeout'))
+        }, lockTimeout)
 
         if (result === Locker.WAIT) return
 
@@ -100,13 +99,13 @@ function Locker (options) {
     }
   }
 
-  locker.publish = function (key, value, timeout) {
+  locker.publish = function (key, result, timeout) {
     return function (callback) {
       callback = callback || noop
       timeout = timeout || resultTimeout
       debug('publish %s', key)
       var redisKey = `${redisPrefix}:${key}`
-      redis.evalauto(luaDelPubScript, 2, redisKey, channel, JSON.stringify(value), timeout)(function (err, result) {
+      redis.evalauto(luaDelPubScript, 2, redisKey, channel, JSON.stringify(result), timeout)(function (err, result) {
         if (err) return callback(err)
         debug('publish result %s', result)
         callback(null, result)
