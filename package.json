@@ -1,6 +1,6 @@
 {
   "name": "process-locker",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Base on redis, same resource should only be processed once. Requests about the resource will be pending until process is complete and then the result will be returned.",
   "main": "index.js",
   "scripts": {

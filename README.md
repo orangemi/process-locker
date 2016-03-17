@@ -27,8 +27,8 @@ locker.request(key)(function (err, resp) {
 ### Locker(options)
 return a locker instance
 options:
-- **redis** *thunk-redis-client* use [thunk-redis](https://github.com/thunks/thunk-redis) client to lock and publish events. Default use: `localhost:6379`
-- **subRedis** *thunk-redis-client* use [thunk-redis](https://github.com/thunks/thunk-redis) client to subscribe events. Default use: `localhost:6379`
+- **redis** *thunk-redis-client* or *string* use [thunk-redis](https://github.com/thunks/thunk-redis) client to lock and publish events. Default use: `localhost:6379`
+- **subRedis** *thunk-redis-client* or *string* use [thunk-redis](https://github.com/thunks/thunk-redis) client to subscribe events. Default use: `localhost:6379`
 - **redisPrefix** *String* Default: `locker`
 - **channel** *String* channel name for redis subscribe Default: `channel`
 - **resultTimeout** *Number* milliseconds to cache the process result Default: `30 * 60 * 1000`

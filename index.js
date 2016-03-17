@@ -21,8 +21,8 @@ function Locker (options) {
   var list = Object.create(null)
   var redis, subRedis, redisPrefix, channel, resultTimeout, lockTimeout, processTimeout
 
-  redis = options.redis || (typeof options.redis === 'string' ? thunkRedis.createClient(options.redis) : thunkRedis.createClient('localhost:6379'))
-  subRedis = options.subRedis || (typeof options.subRedis === 'string' ? thunkRedis.createClient(options.subRedis) : thunkRedis.createClient('localhost:6379'))
+  redis = typeof options.redis === 'string' ? thunkRedis.createClient(options.redis) : options.redis || thunkRedis.createClient('localhost:6379')
+  subRedis = typeof options.subRedis === 'string' ? thunkRedis.createClient(options.subRedis) : options.subRedis || thunkRedis.createClient('localhost:6379')
   redisPrefix = options.redisPrefix || 'locker'
   channel = redisPrefix + ':' + (options.channel || 'channel')
   resultTimeout = options.resultTimeout || 30 * 60 * 1000

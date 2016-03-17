@@ -1,24 +1,50 @@
 'use strict'
 /* global describe, it, before, after */
+const redis = require('thunk-redis')
 const thunk = require('thunks')()
 const Locker = require('../')
 const assert = require('assert')
 
-let locker = Locker({
-  processTimeout: 100
-})
+let redisClient = redis.createClient('localhost:6379')
+let redisClient2 = redis.createClient('localhost:6379')
 
 describe('main', function () {
+  let locker
   let key = 'one-key'
   let key2 = 'one-key2'
   before(function *() {
-    yield locker.redis.del('locker:' + key)
-    yield locker.redis.del('locker:' + key2)
+    yield redisClient.del('locker:' + key)
+    yield redisClient.del('locker:' + key2)
   })
   after(function *() {
-    yield locker.redis.del('locker:' + key)
-    yield locker.redis.del('locker:' + key2)
+    yield redisClient.del('locker:' + key)
+    yield redisClient.del('locker:' + key2)
   })
+
+  it('init locker', function *() {
+    locker = Locker({
+      processTimeout: 100
+    })
+    locker = Locker({
+      redis: 'localhost:6379',
+      subRedis: 'localhost:6379',
+      redisPrefix: 'locker2',
+      channel: 'newChannel',
+      resultTimeout: 1000,
+      lockTimeout: 200,
+      processTimeout: 200
+    })
+    locker = Locker({
+      redis: 'localhost:6379',
+      subRedis: redisClient2,
+      redisPrefix: 'locker2',
+      channel: 'newChannel',
+      resultTimeout: 1000,
+      lockTimeout: 200,
+      processTimeout: 200
+    })
+  })
+
   it('start to lock', function *() {
     let result = yield locker.request(key)
     assert.strictEqual(result.status, Locker.LOCKED)
