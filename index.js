@@ -64,8 +64,11 @@ function Locker (options) {
       list[key] = list[key] || []
       var timer
       var _callback = callback || noop
+      var called = false
       callback = function () {
         if (timer) clearTimeout(timer)
+        if (called) return
+        called = true
         _callback.apply(this, arguments)
       }
 
