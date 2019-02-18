@@ -108,7 +108,7 @@ function Locker (options) {
       timeout = timeout || resultTimeout
       debug('publish %s', key)
       var redisKey = `${redisPrefix}:${key}`
-      redis.evalauto(luaDelPubScript, 2, redisKey, channel, JSON.stringify(result), timeout)(function (err, result) {
+      redis.evalauto(luaDelPubScript, 1, redisKey, channel, JSON.stringify(result), timeout)(function (err, result) {
         if (err) return callback(err)
         debug('publish result %s', result)
         callback(null, result)
